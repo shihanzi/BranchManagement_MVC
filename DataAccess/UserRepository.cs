@@ -76,7 +76,59 @@ namespace AhadiyyaMVC.DataAccess
 
             return users;
         }
+        public List<DistrictModel> GetAllDistricts()
+        {
+            var districts = new List<DistrictModel>();
 
+            using (var conn = _db.GetConnection())
+            {
+                conn.Open();
+                string query = "SELECT Id,Name FROM Districts";
+
+                using (var cmd = new SqlCommand(query, conn))
+                {
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            districts.Add(new DistrictModel
+                            {
+                                Id = reader.GetInt32(0),
+                                Name = reader.GetString(1)
+                            });
+                        }
+                    }
+                }
+            }
+            return districts;
+        }
+
+        public List<BranchModel> GetAllBranches()
+        {
+            var branches = new List<BranchModel>();
+
+            using (var conn = _db.GetConnection())
+            {
+                conn.Open();
+                string query = "SELECT Id,Name,DistrictId FROM Branches";
+
+                using (var cmd = new SqlCommand(query, conn))
+                {
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            branches.Add(new BranchModel
+                            {
+                                Id = reader.GetInt32(0),
+                                Name = reader.GetString(1)
+                            });
+                        }
+                    }
+                }
+            }
+            return branches;
+        }
         public void AddUser(UserModel user)
         {
             using (var conn = _db.GetConnection())

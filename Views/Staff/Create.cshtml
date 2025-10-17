@@ -1,0 +1,60 @@
+﻿ @model AhadiyyaMVC.Models.UserModel
+@{
+    //Layout = "_Layout"; // or null if standalone
+    ViewData["Title"] = "Add Staff";
+}
+<h3>Create New User</h3>
+
+<form asp-action="Create" method="post">
+    <div class="mb-3">
+        <label asp-for="FirstName" class="form-label"></label>
+        <input asp-for="FirstName" class="form-control" />
+        <span asp-validation-for="FirstName" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label>Last Name</label>
+        <input asp-for="LastName" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label>Username</label>
+        <input asp-for="Username" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label>Password</label>
+        <input asp-for="Password" type="password" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label>Email</label>
+        <input asp-for="Email" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label>Phone</label>
+        <input asp-for="Phone" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label>Address</label>
+        <textarea asp-for="Address" class="form-control"></textarea>
+    </div>
+    <div class="mb-3">
+        <label>Educational Qualifications</label>
+        <input asp-for="EducationalQualifications" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label>Handling Classes</label>
+        <input asp-for="HandlingClasses" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label>District</label>
+        <select asp-for="DistrictId" class="form-control" asp-items="@(new SelectList(ViewBag.Districts, "Id", "Name"))">
+            <option value="">--Select District--</option>
+        </select>
+    </div>
+    <div class="mb-3">
+        <label>Branch</label>
+        <select asp-for="BranchId" class="form-control" asp-items="@(new SelectList(ViewBag.Branches, "Id", "Name"))">
+            <option value="">--Select Branch--</option>
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Add Staff</button>
+</form>
