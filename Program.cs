@@ -10,6 +10,10 @@ builder.Services.AddControllersWithViews(options =>
     options.Filters.Add<SessionAuthorizeAttribute>();
 });
 builder.Services.AddSingleton<DbConnectionHelper>();
+builder.Services.AddScoped<StaffRepository>();
+builder.Services.AddScoped<DistrictRepository>();
+builder.Services.AddScoped<BranchRepository>();
+builder.Services.AddScoped<RoleRepository>();
 builder.Services.AddScoped<UserRepository>();
 
 builder.Services.AddDistributedMemoryCache(); // stores session in memory

@@ -1,4 +1,4 @@
-﻿@model List<AhadiyyaMVC.Models.UserModel>
+﻿@model List<AhadiyyaMVC.Models.Staff>
 
 @{
     Layout = "_Layout"; // optional, or you can keep Layout=null if you don't have a layout yet
@@ -31,7 +31,9 @@
         <div class="dashboard-header">
             <h2>Welcome, @Context.Session.GetString("FirstName")</h2>
         </div>
-
+        <a asp-controller="Staff" asp-action="Create" class="btn btn-success mb-3">
+            Add Staff
+        </a>
         <div class="card p-3 mb-4">
             <h5 class="card-title">Staff List</h5>
             <div class="table-responsive">

@@ -1,6 +1,5 @@
 using AhadiyyaMVC.DataAccess;
 using AhadiyyaMVC.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
@@ -9,13 +8,12 @@ namespace AhadiyyaMVC.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private UserRepository _userRepository;
-        public HomeController(ILogger<HomeController> logger, UserRepository userRepository)
+        private StaffRepository _userRepository;
+        public HomeController(ILogger<HomeController> logger, StaffRepository userRepository)
         {
             _logger = logger;
             _userRepository = userRepository;
         }
-
         public IActionResult Index()
         {
             var users = _userRepository.GetAllUsers(); // fetch all users

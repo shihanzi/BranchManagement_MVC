@@ -6,20 +6,27 @@ namespace AhadiyyaMVC.Controllers
 {
     public class StaffController : Controller
     {
-        private readonly UserRepository _userRepository;
+        private readonly StaffRepository _userRepository;
+        private readonly DistrictRepository _districtRepository;
+        private readonly BranchRepository _branchRepository;
 
-        public StaffController(UserRepository userRepository)
+        public StaffController(StaffRepository userRepository, DistrictRepository districtRepo, BranchRepository branchRepo)
         {
             _userRepository = userRepository;
+            _districtRepository = districtRepo;
+            _branchRepository = branchRepo;
         }
 
+        [HttpGet]
         public IActionResult Create()
         {
-            return View(new UserModel());
+            ViewBag.Districts = _districtRepository.GetDistricts();
+            ViewBag.Branches = _branchRepository.GetBranches();
+            return View(new Staff());
         }
 
         [HttpPost]
-        public IActionResult Create(UserModel model)
+        public IActionResult Create(Staff model)
         {
             if (!ModelState.IsValid)
             {
@@ -29,7 +36,7 @@ namespace AhadiyyaMVC.Controllers
             }
 
             _userRepository.AddUser(model);
-            return RedirectToAction("Index"); // Back to dashboard
+            return RedirectToAction("Index", "Home");
         }
 
         public IActionResult Index()
