@@ -16,7 +16,7 @@ namespace AhadiyyaMVC.Controllers
         }
         public IActionResult Index()
         {
-            var users = _userRepository.GetAllUsers(); // fetch all users
+            var users = _userRepository.GetAll(); // fetch all users
             return View(users);
         }
 

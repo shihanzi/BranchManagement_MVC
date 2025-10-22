@@ -1,158 +1,147 @@
 ﻿using AhadiyyaMVC.Models;
 using Microsoft.Data.SqlClient;
+using System.Collections.Generic;
 
 namespace AhadiyyaMVC.DataAccess
 {
     public class StaffRepository
     {
         private readonly DbConnectionHelper _db;
-        public StaffRepository(DbConnectionHelper db)
+        public StaffRepository(DbConnectionHelper db) => _db = db;
+
+        // Get list with role-based filter arguments (null = no-filter)
+        public List<Staff> GetAll(int? roleId = null, int? sessionDistrictId = null, int? sessionBranchId = null)
         {
-            _db = db;
-        }
-        public List<Staff> GetAllStaffByBranch(int branchId)
-        {
-            var staff = new List<Staff>();
+            var list = new List<Staff>();
             using var conn = _db.GetConnection();
             conn.Open();
 
-            var query = branchId == 0
-                ? "SELECT * FROM Users WHERE Role = 'Staff'"
-                : "SELECT * FROM Users WHERE Role = 'Staff' AND BranchId = @BranchId";
+            // base query
+            string sql = @"SELECT Id, FirstName, LastName, Email, Phone, Address, EducationalQualifications, HandlingClasses, DistrictId, BranchId
+                           FROM Staffs
+                           WHERE 1=1";
 
-            using var cmd = new SqlCommand(query, conn);
-            if (branchId != 0)
-                cmd.Parameters.AddWithValue("@BranchId", branchId);
+            // apply filtering based on role
+            if (roleId == 2 && sessionDistrictId.HasValue) // District Admin
+            {
+                sql += " AND DistrictId = @DistrictId";
+            }
+            else if ((roleId == 3 || roleId == 4) && sessionBranchId.HasValue) // Branch Admin / Staff (if used)
+            {
+                sql += " AND BranchId = @BranchId";
+            }
+
+            using var cmd = new SqlCommand(sql, conn);
+
+            if (roleId == 2 && sessionDistrictId.HasValue)
+                cmd.Parameters.AddWithValue("@DistrictId", sessionDistrictId.Value);
+
+            if ((roleId == 3 || roleId == 4) && sessionBranchId.HasValue)
+                cmd.Parameters.AddWithValue("@BranchId", sessionBranchId.Value);
 
             using var reader = cmd.ExecuteReader();
             while (reader.Read())
             {
-                staff.Add(new Staff
+                list.Add(new Staff  
                 {
-                    Id = (int)reader["Id"],
-                    FirstName = reader["FirstName"].ToString(),
-                    LastName = reader["LastName"].ToString(),
-                    Phone = reader["Phone"].ToString(),
-                    Address = reader["Address"].ToString(),
-                    EducationalQualifications = reader["EducationalQualifications"].ToString(),
-                    HandlingClasses = reader["HandlingClasses"].ToString(),
-                    BranchId = (int)reader["BranchId"],
-                    DistrictId = (int)reader["DistrictId"]
+                    Id = reader.GetInt32(0),
+                    FirstName = reader.IsDBNull(1) ? "" : reader.GetString(1),
+                    LastName = reader.IsDBNull(2) ? "" : reader.GetString(2),
+                    Email = reader.IsDBNull(3) ? "" : reader.GetString(3),
+                    Phone = reader.IsDBNull(4) ? "" : reader.GetString(4),
+                    Address = reader.IsDBNull(5) ? "" : reader.GetString(5),
+                    EducationalQualifications = reader.IsDBNull(6) ? "" : reader.GetString(6),
+                    HandlingClasses = reader.IsDBNull(7) ? "" : reader.GetString(7),
+                    DistrictId = reader.IsDBNull(8) ? 0 : reader.GetInt32(8),
+                    BranchId = reader.IsDBNull(9) ? 0 : reader.GetInt32(9)
                 });
             }
-            return staff;
+            return list;
         }
 
-        public List<Staff> GetAllUsers()
+        public Staff GetById(int id)
         {
-            var users = new List<Staff>();
-
-            using (var conn = _db.GetConnection())
+            using var conn = _db.GetConnection();
+            conn.Open();
+            string sql = @"SELECT Id, FirstName, LastName, Email, Phone, Address, EducationalQualifications, HandlingClasses, DistrictId, BranchId
+                           FROM Staffs WHERE Id = @Id";
+            using var cmd = new SqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@Id", id);
+            using var reader = cmd.ExecuteReader();
+            if (!reader.Read()) return null;
+            return new Staff
             {
-                conn.Open();
-                string query = "SELECT Id, FirstName, LastName,Phone, Address, DistrictId, BranchId,HandlingClasses,Email FROM Staffs";
-
-                using (var cmd = new SqlCommand(query, conn))
-                {
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            users.Add(new Staff
-                            {
-                                Id = reader.GetInt32(0),
-                                FirstName = reader.GetString(1),
-                                LastName = reader.GetString(2),
-                                Phone = reader.IsDBNull(3) ? "" : reader.GetString(3),
-                                Address = reader.IsDBNull(4) ? "" : reader.GetString(4),
-                                DistrictId = reader.IsDBNull(5) ? 0 : reader.GetInt32(5),
-                                BranchId = reader.IsDBNull(6) ? 0 : reader.GetInt32(6),
-                                HandlingClasses = reader.IsDBNull(7) ? "" : reader.GetString(7),
-                                Email = reader.GetString(8),
-                            });
-                        }
-                    }
-                }
-            }
-
-            return users;
-        }
-        public List<District> GetAllDistricts()
-        {
-            var districts = new List<District>();
-
-            using (var conn = _db.GetConnection())
-            {
-                conn.Open();
-                string query = "SELECT Id,Name FROM Districts";
-
-                using (var cmd = new SqlCommand(query, conn))
-                {
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            districts.Add(new District
-                            {
-                                Id = reader.GetInt32(0),
-                                Name = reader.GetString(1)
-                            });
-                        }
-                    }
-                }
-            }
-            return districts;
+                Id = reader.GetInt32(0),
+                FirstName = reader.IsDBNull(1) ? "" : reader.GetString(1),
+                LastName = reader.IsDBNull(2) ? "" : reader.GetString(2),
+                Email = reader.IsDBNull(3) ? "" : reader.GetString(3),
+                Phone = reader.IsDBNull(4) ? "" : reader.GetString(4),
+                Address = reader.IsDBNull(5) ? "" : reader.GetString(5),
+                EducationalQualifications = reader.IsDBNull(6) ? "" : reader.GetString(6),
+                HandlingClasses = reader.IsDBNull(7) ? "" : reader.GetString(7),
+                DistrictId = reader.IsDBNull(8) ? 0 : reader.GetInt32(8),
+                BranchId = reader.IsDBNull(9) ? 0 : reader.GetInt32(9)
+            };
         }
 
-        public List<Branch> GetAllBranches()
+        public void Add(Staff model)
         {
-            var branches = new List<Branch>();
-
-            using (var conn = _db.GetConnection())
-            {
-                conn.Open();
-                string query = "SELECT Id,Name,DistrictId FROM Branches";
-
-                using (var cmd = new SqlCommand(query, conn))
-                {
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            branches.Add(new Branch
-                            {
-                                Id = reader.GetInt32(0),
-                                Name = reader.GetString(1)
-                            });
-                        }
-                    }
-                }
-            }
-            return branches;
+            using var conn = _db.GetConnection();
+            conn.Open();
+            string sql = @"
+                INSERT INTO Staffs (FirstName, LastName, Email, Phone, Address, EducationalQualifications, HandlingClasses, DistrictId, BranchId)
+                VALUES (@FirstName, @LastName, @Email, @Phone, @Address, @Edu, @Handling, @DistrictId, @BranchId)";
+            using var cmd = new SqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@FirstName", model.FirstName ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("@LastName", model.LastName ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("@Email", model.Email ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("@Phone", model.Phone ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("@Address", model.Address ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("@Edu", model.EducationalQualifications ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("@Handling", model.HandlingClasses ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("@DistrictId", model.DistrictId == 0 ? (object)DBNull.Value : model.DistrictId);
+            cmd.Parameters.AddWithValue("@BranchId", model.BranchId == 0 ? (object)DBNull.Value : model.BranchId);
+            cmd.ExecuteNonQuery();
         }
-        public void AddUser(Staff user)
-        {
-            using (var conn = _db.GetConnection())
-            {
-                conn.Open();
-                string query = @"INSERT INTO Staffs 
-                (FirstName, LastName, Phone, Address, EducationalQualifications, HandlingClasses, DistrictId, BranchId,Email)
-                VALUES (@FirstName, @LastName, @Phone, @Address, @Edu, @Classes, @DistrictId, @BranchId,@Email)";
 
-                using (var cmd = new SqlCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@FirstName", user.FirstName);
-                    cmd.Parameters.AddWithValue("@LastName", user.LastName);
-                    cmd.Parameters.AddWithValue("@Phone", user.Phone);
-                    cmd.Parameters.AddWithValue("@Address", user.Address);
-                    cmd.Parameters.AddWithValue("@Edu", user.EducationalQualifications);
-                    cmd.Parameters.AddWithValue("@Classes", user.HandlingClasses);
-                    cmd.Parameters.AddWithValue("@DistrictId", user.DistrictId);
-                    cmd.Parameters.AddWithValue("@BranchId", user.BranchId);
-                    cmd.Parameters.AddWithValue("@Email", user.Email);
-                    cmd.ExecuteNonQuery();
-                }
-            }
+        public void Update(Staff model)
+        {
+            using var conn = _db.GetConnection();
+            conn.Open();
+            string sql = @"
+                UPDATE Staffs SET
+                    FirstName = @FirstName,
+                    LastName = @LastName,
+                    Email = @Email,
+                    Phone = @Phone,
+                    Address = @Address,
+                    EducationalQualifications = @Edu,
+                    HandlingClasses = @Handling,
+                    DistrictId = @DistrictId,
+                    BranchId = @BranchId
+                WHERE Id = @Id";
+            using var cmd = new SqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@FirstName", model.FirstName ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("@LastName", model.LastName ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("@Email", model.Email ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("@Phone", model.Phone ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("@Address", model.Address ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("@Edu", model.EducationalQualifications ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("@Handling", model.HandlingClasses ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("@DistrictId", model.DistrictId == 0 ? (object)DBNull.Value : model.DistrictId);
+            cmd.Parameters.AddWithValue("@BranchId", model.BranchId == 0 ? (object)DBNull.Value : model.BranchId);
+            cmd.Parameters.AddWithValue("@Id", model.Id);
+            cmd.ExecuteNonQuery();
+        }
+
+        public void Delete(int id)
+        {
+            using var conn = _db.GetConnection();
+            conn.Open();
+            string sql = "DELETE FROM Staffs WHERE Id = @Id";
+            using var cmd = new SqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@Id", id);
+            cmd.ExecuteNonQuery();
         }
     }
 }
