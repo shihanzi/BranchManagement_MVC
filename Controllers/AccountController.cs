@@ -12,12 +12,9 @@ namespace AhadiyyaMVC.Controllers
         private readonly UserRepository _userRepo;
 
         public AccountController(DbConnectionHelper db, UserRepository userRepo)
-        {
-            _db = db;
-            _userRepo = userRepo;
-        }
+        => (_db, _userRepo) = (db, userRepo);
 
-        
+
         [HttpGet]
         [AllowAnonymous]
         public IActionResult Login()
@@ -87,7 +84,7 @@ namespace AhadiyyaMVC.Controllers
         public ActionResult Logout()
         {
             HttpContext.Session.Clear();
-            return RedirectToAction("Login");
+            return RedirectToAction("Login","Account");
         }
     }
 }
