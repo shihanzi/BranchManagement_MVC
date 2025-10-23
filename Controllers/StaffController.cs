@@ -31,8 +31,40 @@ namespace AhadiyyaMVC.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            ViewBag.Districts = _districtRepo.GetDistricts();
-            ViewBag.Branches = _branchRepo.GetBranches();
+            int? roleId = HttpContext.Session.GetInt32("RoleId");
+            int? sessionDistrict = HttpContext.Session.GetInt32("DistrictId");
+            int? sessionBranch = HttpContext.Session.GetInt32("BranchId");
+
+            // DISTRICTS
+            if (roleId == 2) // District Admin → only their district
+            {
+                ViewBag.Districts = _districtRepo
+                    .GetDistricts()
+                    .Where(d => d.Id == sessionDistrict.Value)
+                    .ToList();
+            }
+            else
+            {
+                ViewBag.Districts = _districtRepo.GetDistricts(); // Super Admin & Branch Admin → full list
+            }
+
+            // BRANCHES
+            if (roleId == 3) // Branch Admin → only their branch
+            {
+                ViewBag.Branches = _branchRepo
+                    .GetBranches()
+                    .Where(b => b.Id == sessionBranch.Value)
+                    .ToList();
+            }
+            else if (roleId == 2) // District Admin → only branches in their district
+            {
+                ViewBag.Branches = _branchRepo.GetBranchesByDistrict(sessionDistrict.Value);
+            }
+            else
+            {
+                ViewBag.Branches = _branchRepo.GetBranches(); // Super Admin → full list
+            }
+
             return View(new Staff());
         }
 
@@ -67,6 +99,14 @@ namespace AhadiyyaMVC.Controllers
                 return View(model);
             }
 
+            if (!ModelState.IsValid)
+            {
+                // refill dropdowns
+                ViewBag.Districts = _districtRepo.GetDistricts();
+                ViewBag.Branches = _branchRepo.GetBranches();
+                return View(model);
+            }
+
             _staffRepo.Add(model);
             return RedirectToAction("Index","Home");
         }
@@ -85,7 +125,7 @@ namespace AhadiyyaMVC.Controllers
             if (roleId == 3 && model.BranchId != sessionBranch) return Forbid();
 
             ViewBag.Districts = _districtRepo.GetDistricts();
-            ViewBag.Branches = _branchRepo.GetBranches();
+            ViewBag.Branches = (roleId == 2) ? _branchRepo.GetBranchesByDistrict(sessionDistrict.Value) : _branchRepo.GetBranches();
             return View(model);
         }
 
@@ -93,10 +133,14 @@ namespace AhadiyyaMVC.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Edit(Staff model)
         {
+            int? roleId = HttpContext.Session.GetInt32("RoleId");
+            int? sessionDistrict = HttpContext.Session.GetInt32("DistrictId");
+            int? sessionBranch = HttpContext.Session.GetInt32("BranchId");
+
             if (!ModelState.IsValid)
             {
                 ViewBag.Districts = _districtRepo.GetDistricts();
-                ViewBag.Branches = _branchRepo.GetBranches();
+                ViewBag.Branches = _branchRepo.GetBranchesByDistrict(sessionDistrict ?? 0);
                 return View(model);
             }
 
@@ -120,6 +164,15 @@ namespace AhadiyyaMVC.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Delete(int id)
         {
+            var model = _staffRepo.GetById(id);
+            if (model == null) return NotFound();
+
+            int? roleId = HttpContext.Session.GetInt32("RoleId");
+            int? sessionDistrict = HttpContext.Session.GetInt32("DistrictId");
+            int? sessionBranch = HttpContext.Session.GetInt32("BranchId");
+
+            if (roleId == 2 && model.DistrictId != sessionDistrict) return Forbid();
+            if (roleId == 3 && model.BranchId != sessionBranch) return Forbid();
             // You can add checks similar to Edit/Delete access
             _staffRepo.Delete(id);
             return RedirectToAction("Index","Home");

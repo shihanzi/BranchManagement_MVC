@@ -1,7 +1,11 @@
 ﻿@model List<AhadiyyaMVC.Models.Staff>
+
 @{
-    ViewData["Title"] = "Staff";
+    var roleId = Context.Session.GetInt32("RoleId");
+    var sessionDistrict = Context.Session.GetInt32("DistrictId");
+    var sessionBranch = Context.Session.GetInt32("BranchId");
 }
+
 <h2>Staff</h2>
 
 <div class="mb-3">
@@ -12,7 +16,7 @@
     <thead>
         <tr>
             <th>#</th>
-            <th>Full Name</th>
+            <th>Name</th>
             <th>Phone</th>
             <th>Email</th>
             <th>District</th>
@@ -34,12 +38,33 @@
                     <td>@s.DistrictId</td>
                     <td>@s.BranchId</td>
                     <td>
-                        <a asp-controller="Staff" asp-action="Edit" asp-route-id="@s.Id" class="btn btn-sm btn-primary">Edit</a>
-                        <form asp-controller="Staff" asp-action="Delete" style="display:inline" asp-route-id="@s.Id" onsubmit="return confirm('Delete this staff?');">
-                            <input type="hidden" name="id" value="@s.Id" />
-                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                            @Html.AntiForgeryToken()
-                        </form>
+                        @{
+                            bool canEdit = false;
+
+                            if (roleId == 1)  // Super Admin
+                            {
+                                canEdit = true;
+                            }
+                            else if (roleId == 2 && s.DistrictId == sessionDistrict) // District Admin
+                            {
+                                canEdit = true;
+                            }
+                            else if (roleId == 3 && s.BranchId == sessionBranch) // Branch Admin
+                            {
+                                canEdit = true;
+                            }
+                        }
+
+                        @if (canEdit)
+                        {
+                            <a asp-controller="Staff" asp-action="Edit" asp-route-id="@s.Id" class="btn btn-sm btn-primary">Edit</a>
+
+                            <form asp-action="Delete" method="post" style="display:inline" onsubmit="return confirm('Delete this staff?');">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@s.Id" />
+                                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                            </form>
+                        }
                     </td>
                 </tr>
                 i++;

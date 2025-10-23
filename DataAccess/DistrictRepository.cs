@@ -10,6 +10,33 @@ namespace AhadiyyaMVC.DataAccess
         {
             _db = db;
         }
+
+        public District GetById(int id)
+        {
+            using (var conn = _db.GetConnection())
+            {
+                conn.Open();
+                string query = "SELECT Id, Name FROM districts WHERE Id = @id";
+                using (var cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@id", id);
+
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            return new District
+                            {
+                                Id = reader.GetInt32(0),
+                                Name = reader.GetString(1),
+                            };
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
         public List<District> GetDistricts()
         {
             var districts = new List<District>();

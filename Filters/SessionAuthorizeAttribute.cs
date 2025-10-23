@@ -22,6 +22,7 @@ namespace AhadiyyaMVC.Filters
             {
                 context.Result = new RedirectToActionResult("Login", "Account", null);
             }
+            base.OnActionExecuting(context);
         }
     }
 }

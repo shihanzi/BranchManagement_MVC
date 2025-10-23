@@ -1,0 +1,27 @@
+﻿@model AhadiyyaMVC.Models.Branch
+@{
+    ViewData["Title"] = "Edit Branch";
+}
+
+<h2>Edit Branch</h2>
+
+<form asp-action="Edit" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="DistrictId" class="form-label"></label>
+        <select asp-for="DistrictId" class="form-control" asp-items="@(new SelectList(ViewBag.Districts, "Id", "Name"))">
+            <option value="">-- Select District --</option>
+        </select>
+        <span asp-validation-for="DistrictId" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
