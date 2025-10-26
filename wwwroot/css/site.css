@@ -20,3 +20,22 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+/* Make the collapsed menu float instead of pushing content down */
+/*.navbar .collapse.navbar-collapse {
+    position: absolute;
+    top: 100%;*/ /* below navbar */
+    /*right: 0;
+    background-color: #fff;
+    z-index: 1050;
+    width: 250px;*/ /* adjust width */
+    /*border: 1px solid #ddd;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    border-radius: 0 0 5px 5px;
+    padding: 1rem;
+}*/
+
+/* Optional: style nav links inside overlay */
+/*.navbar .collapse .nav-link {
+    padding: 0.5rem 0;
+}*/

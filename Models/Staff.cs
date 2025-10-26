@@ -12,5 +12,8 @@
         public string EducationalQualifications { get; set; }
         public int DistrictId { get; set; }  
         public int BranchId { get; set; }
+
+        public string District { get; set; }
+        public string Branch { get; set; }
     }
 }

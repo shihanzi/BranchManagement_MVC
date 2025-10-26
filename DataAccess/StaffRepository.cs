@@ -17,9 +17,8 @@ namespace AhadiyyaMVC.DataAccess
             conn.Open();
 
             // base query
-            string sql = @"SELECT Id, FirstName, LastName, Email, Phone, Address, EducationalQualifications, HandlingClasses, DistrictId, BranchId
-                           FROM Staffs
-                           WHERE 1=1";
+            string sql = @"SELECT Staffs.Id, FirstName, LastName, Email, Phone, Address, EducationalQualifications, HandlingClasses, Districts.Name, Branches.Name FROM Staffs INNER JOIN Branches on BranchId=Branches.Id
+                            INNER JOIN Districts on Staffs.DistrictId= Districts.Id WHERE 1=1";
 
             // apply filtering based on role
             if (roleId == 2 && sessionDistrictId.HasValue) // District Admin
@@ -52,8 +51,8 @@ namespace AhadiyyaMVC.DataAccess
                     Address = reader.IsDBNull(5) ? "" : reader.GetString(5),
                     EducationalQualifications = reader.IsDBNull(6) ? "" : reader.GetString(6),
                     HandlingClasses = reader.IsDBNull(7) ? "" : reader.GetString(7),
-                    DistrictId = reader.IsDBNull(8) ? 0 : reader.GetInt32(8),
-                    BranchId = reader.IsDBNull(9) ? 0 : reader.GetInt32(9)
+                    District = reader.IsDBNull(8) ? "" : reader.GetString(8),
+                    Branch = reader.IsDBNull(9) ? "" : reader.GetString(9)
                 });
             }
             return list;
