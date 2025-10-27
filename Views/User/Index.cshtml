@@ -1,0 +1,63 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@model List<AhadiyyaMVC.Models.User>
+@{
+    ViewData["Title"] = "Users";
+    int? roleId = Context.Session.GetInt32("RoleId");
+    int? sessionDistrict = Context.Session.GetInt32("Id");
+}
+
+<h2>User Management</h2>
+
+<div class="mb-3">
+    <a asp-controller="User" asp-action="Create" class="btn btn-success">Add User</a>
+</div>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>User</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Count > 0)
+        {
+            int i = 1;
+            foreach (var b in Model)
+            {
+                <tr>
+                    <td>@i</td>
+                    <td>@b.Username</td>
+                    <td>
+                        @{
+                            bool canEdit = false;
+                            if (roleId == 1) canEdit = true; // Super
+                                                             //else if (roleId == 2 && sessionDistrict.HasValue && b.DistrictId == sessionDistrict.Value) canEdit = true; // District Admin
+                        }
+                        @if (canEdit)
+                        {
+                            <a asp-controller="User" asp-action="Edit" asp-route-id="@b.Id" class="btn btn-sm btn-primary">Edit</a>
+                            <form asp-action="Delete" method="post" style="display:inline" onsubmit="return confirm('Delete this User?');">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@b.Id" />
+                                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <button class="btn btn-sm btn-secondary" disabled>Not allowed</button>
+                        }
+                    </td>
+                </tr>
+                i++;
+            }
+        }
+        else
+        {
+            <tr><td colspan="4" class="text-center">No Users found.</td></tr>
+        }
+    </tbody>
+</table>

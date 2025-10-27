@@ -1,0 +1,40 @@
+﻿ @model AhadiyyaMVC.Models.User
+@{
+    //Layout = "_Layout"; // or null if standalone
+    ViewData["Title"] = "Add User";
+}
+<h3>Create New User</h3>
+
+<form asp-action="Create" method="post">
+    <div class="mb-3">
+        <label asp-for="Username" class="form-label"></label>
+        <input asp-for="Username" class="form-control" />
+        <span asp-validation-for="Username" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="PasswordHash" class="form-label"></label>
+        <input asp-for="PasswordHash" class="form-control" />
+        <span asp-validation-for="PasswordHash" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label>District</label>
+        <select asp-for="DistrictId" class="form-control" asp-items="@(new SelectList(ViewBag.Districts, "Id", "Name"))">
+            <option value="">--Select District--</option>
+        </select>
+    </div>
+    <div class="mb-3">
+        <label>Branch</label>
+        <select asp-for="BranchId" class="form-control" asp-items="@(new SelectList(ViewBag.Branches, "Id", "Name"))">
+            <option value="">--Select Branch--</option>
+        </select>
+    </div>
+    <div class="mb-3">
+        <label>Role</label>
+        <select asp-for="IsActive" class="form-control" asp-items="@(new SelectList(ViewBag.Roles, "Id", "Name"))">
+            <option value="">--Select Status--</option>
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Add User</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
